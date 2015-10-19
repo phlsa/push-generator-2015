@@ -2,6 +2,7 @@ var canvas = document.getElementById('canvas');
 var ctx = canvas.getContext( '2d' );
 var input = document.getElementById('in');
 var clear = document.getElementById('clear');
+var save = document.getElementById('save');
 var polygons = [];
 
 function reset() {
@@ -159,6 +160,24 @@ clear.addEventListener('click', function(e) {
   input.focus();
 });
 
+save.addEventListener('click', function(e) {
+  var img = Canvas2Image.saveAsPNG( canvas, true, Env.size*2, Env.size*2 );
+  document.getElementsByTagName('body')[0].appendChild(img);
+});
+
+function saveToDisk(name, company) {
+  name = name || 'image-' + new Date().getTime();
+  dataObj = canvas.toDataURL('image/png');
+
+  $.post( 'http://localhost/push/saveImage.php', {
+      'data': dataObj,
+      'name': name,
+      'company': company
+    }, function (data) {
+      console.log(data);
+    }
+  );
+}
 
 // ===== Helper Functions =====
 function drawPolygon(points, proc) {
