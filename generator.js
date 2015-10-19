@@ -1,19 +1,19 @@
 var canvas = document.getElementById('canvas');
 var ctx = canvas.getContext( '2d' );
 var input = document.getElementById('in');
-var clear = document.getElementById('clear');
-var save = document.getElementById('save');
 var polygons = [];
 
 function reset() {
   polygons = [];
+  alternateColorCount = 0;
 }
 
 var Env = {
   isStatic: function() {
     return 1; // 0 => show animation; 1 => display static
   },
-  size: 600
+  size: 600,
+  renderInterval: 150
 }
 
 var DataSource = {
@@ -144,25 +144,47 @@ var proc = new Processing( canvas, function( proc ) {
   }
 });
 
-// ===== Interactions =====
-input.addEventListener('input', function(e) {
-  var input = e.currentTarget.value;
-  for (var i=0; i<input.length; i++) {
-    if (polygons[i] === undefined || polygons[i].char !== input[i]) {
-      polygons[i] = createChar(input[i]);
+function renderString(inputStr) {
+  for (var i=0; i<inputStr.length; i++) {
+    if (polygons[i] === undefined || polygons[i].char !== inputStr[i]) {
+      polygons[i] = createChar(inputStr[i]);
     }
   }
+}
+
+// ===== Interactions =====
+input.addEventListener('input', function(e) {
+  renderString( e.currentTarget.value );
 });
 
-clear.addEventListener('click', function(e) {
+document.getElementById('clear').addEventListener('click', function(e) {
   reset();
   input.value = "";
   input.focus();
 });
 
-save.addEventListener('click', function(e) {
+document.getElementById('save').addEventListener('click', function(e) {
   var img = Canvas2Image.saveAsPNG( canvas, true, Env.size*2, Env.size*2 );
   document.getElementsByTagName('body')[0].appendChild(img);
+});
+
+document.getElementById('save-sequence').addEventListener('click', function(e) {
+  var raw = window.prompt("Gimme gimme!")
+  var persons = raw.split('***');
+  var i = -1;
+  var interval = window.setInterval(function() {
+    if (i < persons.length-1) {
+      i++;
+      reset();
+      input.value = persons[i];
+      renderString(persons[i]);
+      window.setTimeout( function() {
+        saveToDisk(persons[i], "");
+      }, Env.renderInterval/2);
+    } else {
+      window.clearInterval(interval);
+    }
+  }, Env.renderInterval);
 });
 
 function saveToDisk(name, company) {
