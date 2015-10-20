@@ -13,7 +13,7 @@ var Env = {
     return 1; // 0 => show animation; 1 => display static
   },
   size: 600,
-  renderInterval: 150
+  renderInterval: 350
 }
 
 var DataSource = {
