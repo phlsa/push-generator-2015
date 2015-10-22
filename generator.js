@@ -13,7 +13,8 @@ var Env = {
     return 0; // 0 => show animation; 1 => display static
   },
   size: 600,
-  renderInterval: 350
+  renderInterval: 350,
+  letterDelay: 200
 }
 
 var DataSource = {
@@ -146,7 +147,17 @@ var proc = new Processing( canvas, function( proc ) {
 function renderString(inputStr) {
   for (var i=0; i<inputStr.length; i++) {
     if (polygons[i] === undefined || polygons[i].char !== inputStr[i]) {
-      polygons[i] = createChar(inputStr[i]);
+      if (!Env.isStatic()) {
+        function iterate() {
+          var cachedCount = i;
+            window.setTimeout(function() {
+              polygons[cachedCount] = createChar(inputStr[cachedCount]);
+            }, Env.letterDelay*cachedCount);
+        }
+        iterate();
+      } else {
+          polygons[i] = createChar(inputStr[i]);
+      }
     }
   }
 }

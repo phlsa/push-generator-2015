@@ -3,7 +3,7 @@ body {
 }
 
 canvas {
-  mix-blend-mode: overlay;
+  /*mix-blend-mode: overlay;*/
   cursor: none;
   margin-top: 70px;
 }
