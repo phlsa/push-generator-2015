@@ -3,15 +3,66 @@ body {
 }
 
 canvas {
-  /*mix-blend-mode: overlay;*/
+  mix-blend-mode: overlay;
   cursor: none;
   margin-top: 70px;
 }
 
 #container {
+  position: relative;
   width: 1024px;
   height: 786px;
   text-align: center;
   background-image: linear-gradient(to bottom right, rgb(0, 208, 208), rgb(197, 2, 101));
   cursor: none;
+}
+
+#text-container {
+  position: absolute;
+  font-family: "Ratio Display Medium";
+  font-size: 80px;
+  top: 320px;
+  width: 824px;
+  padding: 0 100px;
+  text-align: center;
+  text-transform: uppercase;
+  color: #aaa;
+  mix-blend-mode: overlay;
+}
+
+#text-container span {
+  opacity: 0;
+  display: inline-block;
+}
+
+.up { animation: up 0.3s cubic-bezier(.07,.78,.29,.95); animation-fill-mode: forwards; }
+.down { animation: down 0.3s cubic-bezier(.07,.78,.29,.95); animation-fill-mode: forwards; }
+
+@keyframes up {
+  0% { transform: translate(0, 100px); opacity: 0; }
+  100% { transform: none; opacity: 1; }
+}
+
+@keyframes down {
+  0% { transform: translate(0, -100px); opacity: 0; }
+  100% { transform: none; opacity: 1; }
+}
+
+.shrink { animation: shrink 0.3s cubic-bezier(.07,.78,.29,.95); animation-fill-mode: forwards; }
+.fade-out { animation: fade-out 0.3s cubic-bezier(.07,.78,.29,.95); animation-fill-mode: forwards; }
+
+@keyframes shrink {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+}
+
+@keyframes fade-out {
+  0% { opacity:1 }
+  100% { opacity:0 }
 }

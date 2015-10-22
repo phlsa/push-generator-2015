@@ -2,6 +2,8 @@ var canvas = document.getElementById('canvas');
 var ctx = canvas.getContext( '2d' );
 var input = document.getElementById('in');
 var polygons = [];
+var animationSequence = [];
+var currentSequenceIndex = -1;
 
 function reset() {
   polygons = [];
@@ -14,7 +16,8 @@ var Env = {
   },
   size: 600,
   renderInterval: 350,
-  letterDelay: 200
+  letterDelay: 200,
+  sequenceItemUpTime: 2000 
 }
 
 var DataSource = {
@@ -23,7 +26,7 @@ var DataSource = {
   getChar: function(c) {
     c = c.toLowerCase();
     if (this.normalizedData[c] === undefined) {
-      return " ";
+      return "a";
     } else {
       return this.normalizedData[c];
     }
@@ -116,7 +119,7 @@ var proc = new Processing( canvas, function( proc ) {
       if (p.animationCount < 1) {
         p.animationCount += p.animationSpeed;
         proc.fill.apply(proc, p.color);
-        drawPolygon( partialHexCoords(Env.size/5, p.animationCount, p.variations), proc )
+        drawPolygon( partialHexCoords(Env.size/5, p.animationCount, p.variations), proc );
       } else {
         proc.fill.apply(proc, p.color);
         drawPolygon( hexCoords(Env.size/5, p.variations), proc );
@@ -130,10 +133,11 @@ function renderString(inputStr) {
     if (polygons[i] === undefined || polygons[i].char !== inputStr[i]) {
       if (!Env.isStatic()) {
         function iterate() {
-          var cachedCount = i;
+          var cachedIndex = i;
             window.setTimeout(function() {
-              polygons[cachedCount] = createChar(inputStr[cachedCount]);
-            }, Env.letterDelay*cachedCount);
+              polygons[cachedIndex] = createChar(inputStr[cachedIndex]);
+              $('#text-container').children()[cachedIndex].classList.add(_.sample(['up', 'down']));
+            }, Env.letterDelay*cachedIndex);
         }
         iterate();
       } else {
@@ -141,6 +145,38 @@ function renderString(inputStr) {
       }
     }
   }
+
+  if (!Env.isStatic()) {
+    window.setTimeout(sequenceItemBuildFinished, inputStr.length*Env.letterDelay);
+  }
+}
+
+function renderAnimatedSequence(inputArray) {
+  reset();
+  animationSequence = inputArray;
+  currentSequenceIndex = 0;
+  renderString(animationSequence[currentSequenceIndex]);
+  $('#text-container').empty().append( spanify(animationSequence[currentSequenceIndex]) );
+}
+
+function sequenceItemBuildFinished() {
+  window.setTimeout(function() {
+    canvas.classList.add('shrink');
+    $('#text-container').addClass('fade-out');
+    window.setTimeout(function() {
+      reset();
+      _.delay(function() {
+        canvas.classList.remove('shrink');
+        $('#text-container').removeClass('fade-out');
+        currentSequenceIndex++;
+        if (currentSequenceIndex >= animationSequence.length) {
+          currentSequenceIndex = 0;
+        }
+        renderString(animationSequence[currentSequenceIndex]);
+        $('#text-container').empty().append( spanify(animationSequence[currentSequenceIndex]) );
+      }, 100);
+    }, 300);
+  }, Env.sequenceItemUpTime);
 }
 
 // ===== Interactions =====
@@ -165,13 +201,19 @@ document.getElementById('full-screen').addEventListener('click', function(e) {
   }
 });
 
+document.getElementById('animate-sequence').addEventListener('click', function() {
+  var raw = window.prompt("Gimme gimme!");
+  var persons = raw.split('***');
+  renderAnimatedSequence(persons);
+});
+
 document.getElementById('save').addEventListener('click', function(e) {
   var img = Canvas2Image.saveAsPNG( canvas, true, Env.size, Env.size );
   document.getElementsByTagName('body')[0].appendChild(img);
 });
 
 document.getElementById('save-sequence').addEventListener('click', function(e) {
-  var raw = window.prompt("Gimme gimme!")
+  var raw = window.prompt("Gimme gimme!");
   var persons = raw.split('***');
   var i = -1;
   var interval = window.setInterval(function() {
@@ -255,4 +297,11 @@ function alternateColor() {
   } else {
     return [197, 2, 101, 80];
   }
+}
+
+function spanify (str) {
+  return _.map(str, function(letter) {
+    if (letter === " ") letter = '&nbsp;'
+    return $('<span>' + letter + '</span>');
+  });
 }
