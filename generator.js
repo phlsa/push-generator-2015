@@ -70,9 +70,6 @@ function createChar(char) {
     animationSpeed: 0.01 + Math.random() * 0.02,
     animationCount: Env.isStatic()
   };
-  //c.polygon.setAttribute('fill', randomColor());
-  //c.polygon.setAttribute('transform', 'translate(300, 300), rotate(-90)');
-  //c.polygon.setAttribute('points', list(hexCoords(100, c.variations)));
   return c;
 }
 
@@ -99,22 +96,6 @@ function variationGenerator(mag) {
     get: function() { return this.state }
   };
 }
-
-function animate() {
-  polygons.forEach(function(p) {
-    p.variations.forEach(function(v) {
-       v.update();
-    });
-    if (p.animationCount < 1) {
-      p.animationCount += p.animationSpeed;
-      p.polygon.setAttribute('points', list(partialHexCoords(100, p.animationCount, p.variations)));
-    } else {
-      p.polygon.setAttribute('points', list(hexCoords(100, p.variations)));
-    }
-  });
-  window.requestAnimationFrame(animate);
-}
-//window.requestAnimationFrame(animate);
 
 // ===== Canvas Initialization =====
 var proc = new Processing( canvas, function( proc ) {
