@@ -10,7 +10,7 @@ function reset() {
 
 var Env = {
   isStatic: function() {
-    return 1; // 0 => show animation; 1 => display static
+    return 0; // 0 => show animation; 1 => display static
   },
   size: 600,
   renderInterval: 350
@@ -89,8 +89,11 @@ function variationGenerator(mag) {
     state: 0,
     update: function() {
       this.animationCount += this.animationSpeed;
-      //this.state = Math.sin(this.animationCount)*this.mag; // Animates with a sine curve
-      this.state = this.mag;
+      if (!Env.isStatic()) {
+        this.state = Math.sin(this.animationCount)*0.1+this.mag; // Animates with a sine curve
+      } else {
+        this.state = this.mag;
+      }
     },
     get: function() { return this.state }
   };
@@ -115,10 +118,8 @@ function animate() {
 // ===== Canvas Initialization =====
 var proc = new Processing( canvas, function( proc ) {
   proc.setup = function() {
-    proc.size( Env.size*2, Env.size*2 );
+    proc.size( Env.size, Env.size );
     proc.noStroke();
-    canvas.style.transformOrigin = "0 0";
-    canvas.style.transform = "scale(0.5)";
   }
 
   proc.draw = function() {
@@ -132,13 +133,11 @@ var proc = new Processing( canvas, function( proc ) {
       });
       if (p.animationCount < 1) {
         p.animationCount += p.animationSpeed;
-        //p.polygon.setAttribute('points', list(partialHexCoords(100, p.animationCount, p.variations)));
         proc.fill.apply(proc, p.color);
-        drawPolygon( partialHexCoords(Env.size/2, p.animationCount, p.variations), proc )
+        drawPolygon( partialHexCoords(Env.size/5, p.animationCount, p.variations), proc )
       } else {
-        //p.polygon.setAttribute('points', list(hexCoords(100, p.variations)));
         proc.fill.apply(proc, p.color);
-        drawPolygon( hexCoords(Env.size/2, p.variations), proc );
+        drawPolygon( hexCoords(Env.size/5, p.variations), proc );
       }
     });
   }
@@ -163,8 +162,19 @@ document.getElementById('clear').addEventListener('click', function(e) {
   input.focus();
 });
 
+document.getElementById('full-screen').addEventListener('click', function(e) {
+  var container = document.getElementById('container');
+  if (container.requestFullscreen) {
+    container.requestFullscreen();
+  } else if (container.mozRequestFullScreen) {
+    container.mozRequestFullScreen();
+  } else if (container.webkitRequestFullscreen) {
+    container.webkitRequestFullscreen();
+  }
+});
+
 document.getElementById('save').addEventListener('click', function(e) {
-  var img = Canvas2Image.saveAsPNG( canvas, true, Env.size*2, Env.size*2 );
+  var img = Canvas2Image.saveAsPNG( canvas, true, Env.size, Env.size );
   document.getElementsByTagName('body')[0].appendChild(img);
 });
 
